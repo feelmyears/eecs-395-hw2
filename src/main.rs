@@ -49,6 +49,86 @@ fn known<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
 	return known_words;
 }
 
+struct wordsplits {
+    word1: String,
+    word2: String,
+}
+
+fn edits1(word: String) -> Vec<String>{
+    let letters = "abcdefghijklmnopqrstuvwxyz";
+    let mut splits: Vec<wordsplits> = Vec::new();
+    for i in 0..word.chars().count()+1 {
+        let mut word1 = "".to_string();
+        let mut word2 = "".to_string();
+        for j in 0..word.chars().count() {
+            if j < i {word1 = word1 + word.chars().nth(j).unwrap().to_string().as_str();}
+            else {word2 = word2 + word.chars().nth(j).unwrap().to_string().as_str();}
+            //splits.append((word1, word2));       
+        }
+        let w = wordsplits { word1: word1.clone(), word2: word2.clone() };
+        splits.push(w);
+    }
+    let mut deletes: Vec<String> = Vec::new();
+    for w in &splits {
+        let mut w2 = w.word1.clone();
+        if !w.word2.is_empty() {
+            //let mut w2 = w.word1 + w.word2[1:]
+            for i in 1..w.word2.chars().count() {
+                w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
+            }
+            deletes.push(w2);
+        }
+    }
+    let mut transposes: Vec<String> = Vec::new();
+    for w in &splits {
+        if w.word2.chars().count()>1 {
+            let mut w2 = w.word1.clone();
+            w2 = w2 + w.word2.chars().nth(1).unwrap().to_string().as_str();
+            w2 = w2 + w.word2.chars().nth(0).unwrap().to_string().as_str();
+            for i in 2..w.word2.chars().count() {
+                w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
+            }
+            transposes.push(w2);
+        }
+    }
+    let mut replaces: Vec<String> = Vec::new();
+    for w in &splits { 
+        if !w.word2.is_empty() {
+            for c in letters.chars() {
+                let mut w2 = w.word1.clone();
+                w2 = w2 + c.to_string().as_str();
+                for i in 1..w.word2.chars().count() {
+                    w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
+                }
+                replaces.push(w2);
+            }   
+        }
+    }
+    let mut inserts: Vec<String> = Vec::new();
+    for w in &splits {
+        if !w.word2.is_empty() {
+            for c in letters.chars() {
+                let mut w2 = w.word1.clone();
+                w2 = w2 + c.to_string().as_str();
+                for i in 0..w.word2.chars().count() {
+                    w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
+                }
+                inserts.push(w2);
+            }
+        }
+        else {
+            for c in letters.chars() {
+                let mut w2 = w.word1.clone();
+                w2 = w2 + c.to_string().as_str();
+                inserts.push(w2);
+            }
+        }
+    }
+    //deletes.append(&mut transposes.append(&mut replaces.append(&mut inserts)))*/
+    let ret: Vec<String> = deletes.extend(transposes.iter().cloned());
+    ret
+}
+
 #[cfg(test)]
 mod read_corpus_tests {
 	use super::read_corpus;
