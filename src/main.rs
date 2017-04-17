@@ -6,7 +6,7 @@ extern crate regex;
 use regex::Regex;
 
 fn main() {
-    for w in edits1("to".to_string()) {
+    for w in edits1("to") {
     	println!("{}", w);
     }
 }
@@ -50,14 +50,14 @@ fn known<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
 	return known_words;
 }
 
-struct wordsplits {
+struct WordSplits {
     word1: String,
     word2: String,
 }
 
 const LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz";
-fn splits(word: &str) -> Vec<wordsplits> {
-    let mut splits: Vec<wordsplits> = Vec::new();
+fn splits(word: &str) -> Vec<WordSplits> {
+    let mut splits: Vec<WordSplits> = Vec::new();
     for i in 0..word.chars().count()+1 {
         let mut word1 = "".to_string();
         let mut word2 = "".to_string();
@@ -66,14 +66,14 @@ fn splits(word: &str) -> Vec<wordsplits> {
             else {word2 = word2 + word.chars().nth(j).unwrap().to_string().as_str();}
             //splits.append((word1, word2));       
         }
-        let w = wordsplits { word1: word1.clone(), word2: word2.clone() };
+        let w = WordSplits { word1: word1.clone(), word2: word2.clone() };
         splits.push(w);
     }
 
     return splits;
 }
 
-fn deletes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+fn deletes(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     for w in splits {
         let mut w2 = w.word1.clone();
         if !w.word2.is_empty() {
@@ -86,7 +86,7 @@ fn deletes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
     }
 }
 
-fn transposes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+fn transposes(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     for w in splits {
         if w.word2.chars().count()>1 {
             let mut w2 = w.word1.clone();
@@ -100,7 +100,7 @@ fn transposes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
     }
 }
 
-fn replaces(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+fn replaces(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     for w in splits { 
         if !w.word2.is_empty() {
             for c in LETTERS.chars() {
@@ -116,7 +116,7 @@ fn replaces(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
 }
 
 
-fn inserts(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+fn inserts(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     for w in splits {
         if !w.word2.is_empty() {
             for c in LETTERS.chars() {
@@ -138,8 +138,8 @@ fn inserts(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
     }
 }
 
-fn edits1(word: String) -> WordSet {
-    let splits = splits(&word);
+fn edits1(word: &str) -> WordSet {
+    let splits = splits(word);
     let mut edits = WordSet::new();
    
    	deletes(&splits, &mut edits);
