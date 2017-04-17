@@ -6,12 +6,12 @@ fn main() {
 
 use std::io::{BufRead,BufReader,Read};
 use std::string::String;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 extern crate regex;
 use regex::Regex;
 
-type WordCounts = HashMap<String , usize>;
+type WordCounts = HashMap<String, usize>;
 
 fn read_corpus<R: Read>(reader: R) -> WordCounts {
 	let mut counts: WordCounts = WordCounts::new();
@@ -35,6 +35,18 @@ fn word_probability(word: &str, counts: &WordCounts) -> f64 {
 		Some(&count) => (count as f64) / (counts.len() as f64),
 		_ => 0.
 	}
+}
+
+fn known<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
+	let mut known_words = HashSet::new();
+
+	for &w in words {
+		if counts.contains_key::<str>(w) {
+			known_words.insert(w);
+		}
+	} 
+
+	return known_words;
 }
 
 #[cfg(test)]
@@ -109,5 +121,54 @@ mod word_probability_tests {
 		counts.insert("hello".to_string(), 1);
 		counts.insert("world".to_string(), 1);
 		assert_eq!(0.5, word_probability("hello", &counts));
+	}
+}
+
+#[cfg(test)]
+mod known_tests {
+	use super::{WordCounts, known};
+	use std::collections::HashSet;
+
+	fn mock_counts() -> WordCounts {
+		let mut mock = WordCounts::new();
+		mock.insert("apples".to_string(), 1);
+		mock.insert("bananas".to_string(), 1);
+		mock.insert("cats".to_string(), 1);
+		mock.insert("dogs".to_string(), 1);
+		mock.insert("fish".to_string(), 1);
+
+		return mock;
+	}
+
+
+	#[test]
+	fn no_known_test() {
+		let counts = mock_counts();
+		let words = ["rust", "is", "hard"];
+		assert_eq!(HashSet::new(), known(&words, &counts));
+	}
+
+	#[test]
+	fn one_known_test() {
+		let counts = mock_counts();
+		let words = ["rust", "is", "hard", "apples"];
+		let mut expected = HashSet::new();
+		expected.insert("apples");
+
+		assert_eq!(expected, known(&words, &counts));
+	}
+
+	#[test]
+	fn multiple_known_test() {
+		let counts = mock_counts();
+		let words = ["rust", "is", "hard", "apples", "bananas", "cats", "dogs", "fish"];
+		let mut expected = HashSet::new();
+		expected.insert("apples");
+		expected.insert("bananas");
+		expected.insert("cats");
+		expected.insert("dogs");
+		expected.insert("fish");
+
+		assert_eq!(expected, known(&words, &counts));
 	}
 }
