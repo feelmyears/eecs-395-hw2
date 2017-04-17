@@ -1,9 +1,3 @@
-fn main() {
-    // let lines = read_lines(stdin());
-    // let words = get_words(lines);
-    // let word_counts = count_words(words);
-}
-
 use std::io::{BufRead,BufReader,Read};
 use std::string::String;
 use std::collections::{HashMap, HashSet};
@@ -11,7 +5,14 @@ use std::collections::{HashMap, HashSet};
 extern crate regex;
 use regex::Regex;
 
+fn main() {
+    for w in edits1("to".to_string()) {
+    	println!("{}", w);
+    }
+}
+
 type WordCounts = HashMap<String, usize>;
+type WordSet = HashSet<String>;
 
 fn read_corpus<R: Read>(reader: R) -> WordCounts {
 	let mut counts: WordCounts = WordCounts::new();
@@ -54,8 +55,8 @@ struct wordsplits {
     word2: String,
 }
 
-fn edits1(word: String) -> Vec<String>{
-    let letters = "abcdefghijklmnopqrstuvwxyz";
+const LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz";
+fn splits(word: &str) -> Vec<wordsplits> {
     let mut splits: Vec<wordsplits> = Vec::new();
     for i in 0..word.chars().count()+1 {
         let mut word1 = "".to_string();
@@ -68,19 +69,25 @@ fn edits1(word: String) -> Vec<String>{
         let w = wordsplits { word1: word1.clone(), word2: word2.clone() };
         splits.push(w);
     }
-    let mut deletes: Vec<String> = Vec::new();
-    for w in &splits {
+
+    return splits;
+}
+
+fn deletes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+    for w in splits {
         let mut w2 = w.word1.clone();
         if !w.word2.is_empty() {
             //let mut w2 = w.word1 + w.word2[1:]
             for i in 1..w.word2.chars().count() {
                 w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
             }
-            deletes.push(w2);
+            bucket.insert(w2);
         }
     }
-    let mut transposes: Vec<String> = Vec::new();
-    for w in &splits {
+}
+
+fn transposes(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+    for w in splits {
         if w.word2.chars().count()>1 {
             let mut w2 = w.word1.clone();
             w2 = w2 + w.word2.chars().nth(1).unwrap().to_string().as_str();
@@ -88,45 +95,59 @@ fn edits1(word: String) -> Vec<String>{
             for i in 2..w.word2.chars().count() {
                 w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
             }
-            transposes.push(w2);
+            bucket.insert(w2);
         }
     }
-    let mut replaces: Vec<String> = Vec::new();
-    for w in &splits { 
+}
+
+fn replaces(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+    for w in splits { 
         if !w.word2.is_empty() {
-            for c in letters.chars() {
+            for c in LETTERS.chars() {
                 let mut w2 = w.word1.clone();
                 w2 = w2 + c.to_string().as_str();
                 for i in 1..w.word2.chars().count() {
                     w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
                 }
-                replaces.push(w2);
+                bucket.insert(w2);
             }   
         }
     }
-    let mut inserts: Vec<String> = Vec::new();
-    for w in &splits {
+}
+
+
+fn inserts(splits: &Vec<wordsplits>, bucket: &mut WordSet) {
+    for w in splits {
         if !w.word2.is_empty() {
-            for c in letters.chars() {
+            for c in LETTERS.chars() {
                 let mut w2 = w.word1.clone();
                 w2 = w2 + c.to_string().as_str();
                 for i in 0..w.word2.chars().count() {
                     w2 = w2 + w.word2.chars().nth(i).unwrap().to_string().as_str();
                 }
-                inserts.push(w2);
+                bucket.insert(w2);
             }
         }
         else {
-            for c in letters.chars() {
+            for c in LETTERS.chars() {
                 let mut w2 = w.word1.clone();
                 w2 = w2 + c.to_string().as_str();
-                inserts.push(w2);
+                bucket.insert(w2);
             }
         }
     }
-    //deletes.append(&mut transposes.append(&mut replaces.append(&mut inserts)))*/
-    let ret: Vec<String> = deletes.extend(transposes.iter().cloned());
-    ret
+}
+
+fn edits1(word: String) -> WordSet {
+    let splits = splits(&word);
+    let mut edits = WordSet::new();
+   
+   	deletes(&splits, &mut edits);
+   	transposes(&splits, &mut edits);
+   	replaces(&splits, &mut edits);
+   	inserts(&splits, &mut edits);    
+    
+    return edits;
 }
 
 #[cfg(test)]
