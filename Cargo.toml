@@ -1,0 +1,7 @@
+[package]
+name = "hw2"
+version = "0.1.0"
+authors = ["feelmyears <philipmeyers2017@u.northwestern.edu>"]
+
+[dependencies]
+regex = "0.2"
