@@ -6,9 +6,12 @@ extern crate regex;
 use regex::Regex;
 
 fn main() {
-    for w in edits1("to") {
-    	println!("{}", w);
-    }
+    //for w in edits2("to") {
+    //	println!("{}", w);
+    //}
+	let w = edits1("world");
+	let w2 = edits2("world");
+	println!("{}", w.len()+w2.len());
 }
 
 type WordCounts = HashMap<String, usize>;
@@ -38,12 +41,12 @@ fn word_probability(word: &str, counts: &WordCounts) -> f64 {
 	}
 }
 
-fn known<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
-	let mut known_words = HashSet::new();
+fn known(words: &WordSet, counts: &WordCounts) -> WordSet {
+	let mut known_words = WordSet::new();
 
-	for &w in words {
-		if counts.contains_key::<str>(w) {
-			known_words.insert(w);
+	for w in words {
+		if counts.contains_key(w) {
+			known_words.insert(w.to_string()); // called to_lowercase to dereference (wasn't automatic)
 		}
 	} 
 
@@ -115,7 +118,6 @@ fn replaces(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     }
 }
 
-
 fn inserts(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     for w in splits {
         if !w.word2.is_empty() {
@@ -148,6 +150,44 @@ fn edits1(word: &str) -> WordSet {
    	inserts(&splits, &mut edits);    
     
     return edits;
+}
+
+fn edits2(word: &str) -> WordSet {
+	let mut edits = WordSet::new();
+	for e1 in edits1(word) {
+		for e2 in edits1(e1.as_str()) {edits.insert(e2);}
+	}
+	edits
+}
+
+fn candidates(word: String, counts: &WordCounts) -> WordSet {
+	let mut original_word = WordSet::new();
+	original_word.insert(word.clone());
+	let candidates = known(&original_word, counts);
+	if candidates.len() > 0 {
+		return candidates;
+	}
+	let edits1_words = edits1(&word);
+	let candidates = known(&edits1_words, counts);
+	if candidates.len() > 0 {return candidates;}
+	let edits2_words = edits2(&word);
+	let candidates = known(&edits2_words, counts);
+	if candidates.len() > 0 {
+	 	return candidates;
+	}
+	return original_word;
+}
+
+fn correction(word: &str, counts: &WordCounts) -> String {
+	let mut max: f64 = -1.;
+	let mut max_word = word.to_string();
+	for c in candidates(word.to_string(), counts) {
+		if word_probability(c.as_str(), counts) > max {
+			max = word_probability(c.as_str(), counts);
+			max_word = c.to_string().clone();
+		}
+	}
+	max_word.to_string()
 }
 
 #[cfg(test)]
