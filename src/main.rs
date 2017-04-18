@@ -31,5 +31,6 @@ fn predict_corrections<R: Read>(reader: R, corpus: &WordCounts) {
     	let word_correction = correction(&word, corpus);
 		if word == word_correction {println!("{}", word);}
     	else {println!("{}, {}", word, word_correction);}
+    	println!("{}, {}", word, word_correction);
     }
 }
