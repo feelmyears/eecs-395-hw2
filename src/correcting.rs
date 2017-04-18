@@ -111,7 +111,7 @@ fn inserts(splits: &Vec<WordSplits>, bucket: &mut WordSet) {
     }
 }
 
-pub fn edits1(word: &str) -> WordSet {
+fn edits1(word: &str) -> WordSet {
     let splits = splits(word);
     let mut edits = WordSet::new();
    
@@ -123,7 +123,7 @@ pub fn edits1(word: &str) -> WordSet {
     return edits;
 }
 
-pub fn edits2(word: &str) -> WordSet {
+fn edits2(word: &str) -> WordSet {
 	let mut edits = WordSet::new();
 	for e1 in edits1(word) {
 		for e2 in edits1(e1.as_str()) {edits.insert(e2);}
