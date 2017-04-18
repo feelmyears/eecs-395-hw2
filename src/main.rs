@@ -1,6 +1,7 @@
-use std::io::{BufRead,BufReader,Read};
+use std::io::{BufRead,BufReader,Read,stdin,Write,stdout};
 use std::string::String;
 use std::collections::{HashMap, HashSet};
+use std::env;
 
 extern crate regex;
 use regex::Regex;
@@ -12,10 +13,39 @@ fn main() {
 	let w = edits1("world");
 	let w2 = edits2("world");
 	println!("{}", w.len()+w2.len());
+
+
+	let args: Vec<_> = env::args().collect();
+    if args.len() > 1 {
+        println!("The first argument is {}", args[1]);
+    }
+    
+	let corpus = read_corpus(stdin());
+	for (word, ct) in corpus {
+		println!("{} : {}", word, ct);
+	}
+
+	let words = read_lines(stdin());
+	for w in words {
+		println!("{}", w);
+	}
+
 }
 
 type WordCounts = HashMap<String, usize>;
 type WordSet = HashSet<String>;
+
+/// Reads all lines of an input source into a vector
+fn read_lines<R: Read>(reader: R) -> Vec<String> {
+    let mut input: Vec<String> = vec![];
+    let mut lines = BufReader::new(reader).lines();
+
+    while let Some(Ok(line)) = lines.next() {
+    	input.push(line);
+    }
+
+    return input;
+}
 
 fn read_corpus<R: Read>(reader: R) -> WordCounts {
 	let mut counts: WordCounts = WordCounts::new();
