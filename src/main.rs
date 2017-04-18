@@ -5,8 +5,8 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
-extern crate regex;
-use regex::Regex;
+mod counting;
+use counting::*;
 
 fn main() {
     //for w in edits2("to") {
@@ -35,7 +35,7 @@ fn main() {
 
 }
 
-type WordCounts = HashMap<String, usize>;
+// type WordCounts = HashMap<String, usize>;
 type WordSet = HashSet<String>;
 
 /// Reads all lines of an input source into a vector
@@ -50,23 +50,6 @@ fn read_lines<R: Read>(reader: R) -> Vec<String> {
     return input;
 }
 
-fn read_corpus<R: Read>(reader: R) -> WordCounts {
-	let mut counts: WordCounts = WordCounts::new();
-	let mut lines = BufReader::new(reader).lines();
-	let re = Regex::new(r"[\w']+").unwrap();
-
-    while let Some(Ok(line)) = lines.next() {
-    	for caps in re.captures_iter(&line) {
-			for m in caps.iter() {
-				let tok = m.unwrap().as_str().to_lowercase(); 
-				*counts.entry(tok).or_insert(0) += 1;
-			}			
-		}	
-    }
-
-	return counts;
-}
-
 fn word_probability(word: &str, counts: &WordCounts) -> f64 {
 	match counts.get(word) {
 		Some(&count) => (count as f64) / (counts.len() as f64),
@@ -79,36 +62,12 @@ fn known(words: &WordSet, counts: &WordCounts) -> WordSet {
 
 	for w in words {
 		if counts.contains_key(w) {
-			known_words.insert(w.to_string()); // called to_lowercase to dereference (wasn't automatic)
+			known_words.insert(w.to_string()); 
 		}
 	} 
 
 	return known_words;
 }
-
-// fn candidates(word: String, counts: &WordCounts) -> WordSet {
-// 	let mut original_word = WordSet::new();
-// 	original_word.insert(word.clone());
-
-// 	let candidates = known(&original_word, counts);
-// 	if candidates.len() > 0 {
-// 		return candidates;
-// 	}
-
-// 	let edits1_words = edits1(&word);
-// 	let candidates = known(&edits1_words, counts);
-// 	if candidates.len() > 0 {
-// 		return candidates;
-// 	}
-
-// 	// let edits2_words = edits2(word);
-// 	// let candidates = known(edits2_words, counts);
-// 	// if candidates.len() > 0 {
-// 	// 	return candidates;
-// 	// }
-
-// 	return original_word;
-// }
 
 struct WordSplits {
     word1: String,
