@@ -53,6 +53,30 @@ fn known(words: &WordSet, counts: &WordCounts) -> WordSet {
 	return known_words;
 }
 
+fn candidates(word: String, counts: &WordCounts) -> WordSet {
+	let mut original_word = WordSet::new();
+	original_word.insert(word.clone());
+
+	let candidates = known(&original_word, counts);
+	if candidates.len() > 0 {
+		return candidates;
+	}
+
+	let edits1_words = edits1(&word);
+	let candidates = known(&edits1_words, counts);
+	if candidates.len() > 0 {
+		return candidates;
+	}
+
+	// let edits2_words = edits2(word);
+	// let candidates = known(edits2_words, counts);
+	// if candidates.len() > 0 {
+	// 	return candidates;
+	// }
+
+	return original_word;
+}
+
 struct WordSplits {
     word1: String,
     word2: String,
