@@ -38,16 +38,52 @@ fn word_probability(word: &str, counts: &WordCounts) -> f64 {
 	}
 }
 
-fn known<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
-	let mut known_words = HashSet::new();
+// fn known_old<'a>(words: &[&'a str], counts: &WordCounts) -> HashSet<&'a str> {
+// 	let mut known_words = HashSet::new();
 
-	for &w in words {
-		if counts.contains_key::<str>(w) {
-			known_words.insert(w);
+// 	for &w in words {
+// 		if counts.contains_key::<str>(w) {
+// 			known_words.insert(w);
+// 		}
+// 	} 
+
+// 	return known_words;
+// }
+
+fn known(words: &WordSet, counts: &WordCounts) -> WordSet {
+	let mut known_words = WordSet::new();
+
+	for ref w in words {
+		if counts.contains_key(w) {
+			known_words.insert(THIS LINE IS FUCKED);
 		}
 	} 
 
 	return known_words;
+}
+
+fn candidates(word: String, counts: &WordCounts) -> WordSet {
+	let mut original_word = WordSet::new();
+	original_word.insert(word.clone());
+
+	let candidates = known(&original_word, counts);
+	if candidates.len() > 0 {
+		return candidates;
+	}
+
+	let edits1_words = edits1(&word);
+	let candidates = known(&edits1_words, counts);
+	if candidates.len() > 0 {
+		return candidates;
+	}
+
+	// let edits2_words = edits2(word);
+	// let candidates = known(edits2_words, counts);
+	// if candidates.len() > 0 {
+	// 	return candidates;
+	// }
+
+	return original_word;
 }
 
 struct WordSplits {
