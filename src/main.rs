@@ -2,6 +2,8 @@ use std::io::{BufRead,BufReader,Read,stdin,Write,stdout};
 use std::string::String;
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::fs::File;
+use std::io::prelude::*;
 
 extern crate regex;
 use regex::Regex;
@@ -15,12 +17,13 @@ fn main() {
 	println!("{}", w.len()+w2.len());
 
 
-	let args: Vec<_> = env::args().collect();
-    if args.len() > 1 {
-        println!("The first argument is {}", args[1]);
-    }
-    
-	let corpus = read_corpus(stdin());
+	let args: Vec<String> = env::args().collect();
+	let ref path = args[1];
+
+	let file = File::open(path).unwrap();
+	let mut buf_reader = BufReader::new(file);
+	let corpus = read_corpus(buf_reader);
+
 	for (word, ct) in corpus {
 		println!("{} : {}", word, ct);
 	}
