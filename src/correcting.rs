@@ -191,7 +191,7 @@ mod word_probability_tests {
 
 #[cfg(test)]
 mod known_tests {
-	use super::{WordCounts, known};
+	use super::{WordCounts, WordSet, known};
 	use std::collections::HashSet;
 
 	fn mock_counts() -> WordCounts {
@@ -208,16 +208,26 @@ mod known_tests {
 	#[test]
 	fn no_known_test() {
 		let counts = mock_counts();
-		let words = ["rust", "is", "hard"];
+		//let words = ["rust", "is", "hard"];
+        let mut words = WordSet::new();
+        words.insert("rust".to_string());
+        words.insert("is".to_string());
+        words.insert("hard".to_string());
 		assert_eq!(HashSet::new(), known(&words, &counts));
 	}
 
 	#[test]
 	fn one_known_test() {
 		let counts = mock_counts();
-		let words = ["rust", "is", "hard", "apples"];
+		//let words = ["rust", "is", "hard", "apples"];
+        let mut words = WordSet::new();
+        words.insert("rust".to_string());
+        words.insert("is".to_string());
+        words.insert("hard".to_string());
+        words.insert("apples".to_string());
+
 		let mut expected = HashSet::new();
-		expected.insert("apples");
+		expected.insert("apples".to_string());
 
 		assert_eq!(expected, known(&words, &counts));
 	}
@@ -225,13 +235,23 @@ mod known_tests {
 	#[test]
 	fn multiple_known_test() {
 		let counts = mock_counts();
-		let words = ["rust", "is", "hard", "apples", "bananas", "cats", "dogs", "fish"];
+		//let words = ["rust", "is", "hard", "apples", "bananas", "cats", "dogs", "fish"];
+        let mut words = WordSet::new();
+        words.insert("rust".to_string());
+        words.insert("is".to_string());
+        words.insert("hard".to_string());
+        words.insert("apples".to_string());
+        words.insert("bananas".to_string());
+        words.insert("cats".to_string());
+        words.insert("dogs".to_string());
+        words.insert("fish".to_string());
+
 		let mut expected = HashSet::new();
-		expected.insert("apples");
-		expected.insert("bananas");
-		expected.insert("cats");
-		expected.insert("dogs");
-		expected.insert("fish");
+		expected.insert("apples".to_string());
+		expected.insert("bananas".to_string());
+		expected.insert("cats".to_string());
+		expected.insert("dogs".to_string());
+		expected.insert("fish".to_string());
 
 		assert_eq!(expected, known(&words, &counts));
 	}

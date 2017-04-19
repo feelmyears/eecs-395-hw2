@@ -33,3 +33,18 @@ fn predict_corrections<R: Read>(reader: R, corpus: &WordCounts) {
     	else {println!("{}, {}", word, word_correction);}
     }
 }
+
+#[cfg(test)]
+mod correct_tests {
+	use counting::WordCounts;
+	use correcting::correction;
+
+	#[test]
+    fn correct_test() {
+		let mut corpus = WordCounts::new();
+		corpus.insert("correct".to_string(), 1);
+		let input = "corect";
+		let output = correction(input, &corpus);
+		assert_eq!("correct", output);
+	}
+}
