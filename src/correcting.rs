@@ -133,7 +133,7 @@ fn edits2(word: &str) -> WordSet {
 
 fn candidates(word: String, counts: &WordCounts) -> WordSet {
 	let mut original_word = WordSet::new();
-	original_word.insert(word.clone());
+	original_word.insert("-".to_string());
 	let candidates = known(&original_word, counts);
 	if candidates.len() > 0 {
 		return candidates;

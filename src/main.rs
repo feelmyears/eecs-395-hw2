@@ -29,7 +29,9 @@ fn predict_corrections<R: Read>(reader: R, corpus: &WordCounts) {
     while let Some(Ok(line)) = lines.next() {
     	let word = line.trim();
     	let word_correction = correction(&word, corpus);
-		if word == word_correction {println!("{}", word);}
+		if word == word_correction {
+			println!("{}", word);
+		}
     	else {println!("{}, {}", word, word_correction);}
     }
 }
